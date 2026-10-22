@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite stores these workflow values as strings. The application validates
+// them with TypeScript unions and Zod schemas.
+model User {
+  id                    String         @id @default(cuid())
+  name                  String
+  email                 String         @unique
+  passwordHash          String
+  role                  String         @default("USER")
+  verificationStatus    String         @default("UNVERIFIED")
+  verificationCodeHash  String?
+  verificationExpiresAt DateTime?
+  verificationReason    String?
+  idImageUrl            String?
+  city                  String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  listings              Listing[]
+  buyerOrders           Order[]        @relation("BuyerOrders")
+  sellerOrders          Order[]        @relation("SellerOrders")
+  verifications         Verification[] @relation("VerificationSubject")
+  reviews               Verification[] @relation("VerificationReviewer")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  userId     String
+  status     String
+  idImageUrl String
+  reason     String?
+  reviewerId String?
+  createdAt  DateTime  @default(now())
+  reviewedAt DateTime?
+  user       User      @relation("VerificationSubject", fields: [userId], references: [id], onDelete: Cascade)
+  reviewer   User?     @relation("VerificationReviewer", fields: [reviewerId], references: [id])
+
+  @@index([status, createdAt])
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  listings Listing[]
+}
+
+model Listing {
+  id              String         @id @default(cuid())
+  sellerId        String
+  categoryId      String
+  title           String
+  description     String
+  condition       String
+  disposition     String
+  price           Float?
+  city            String?
+  status          String         @default("PENDING_REVIEW")
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  seller          User           @relation(fields: [sellerId], references: [id])
+  category        Category       @relation(fields: [categoryId], references: [id])
+  images          ListingImage[]
+  orders          Order[]
+
+  @@index([status, createdAt])
+  @@index([categoryId, disposition, condition])
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  listingId String
+  url       String
+  position  Int
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, position])
+}
+
+model Order {
+  id          String       @id @default(cuid())
+  listingId   String
+  buyerId     String
+  sellerId    String
+  status      String       @default("PLACED")
+  amount      Float        @default(0)
+  paymentType String       @default("TEST")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  listing     Listing      @relation(fields: [listingId], references: [id])
+  buyer       User         @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller      User         @relation("SellerOrders", fields: [sellerId], references: [id])
+  events      OrderEvent[]
+
+  @@index([buyerId, createdAt])
+  @@index([sellerId, createdAt])
+}
+
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  from      String?
+  to        String
+  note      String?
+  actorId   String?
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}
