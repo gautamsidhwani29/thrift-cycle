@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { ListingGrid } from "./listing-grid";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
-export default function BrowsePage() {
+export default async function BrowsePage() {
+  const session = await auth();
+  const availableListings = await prisma.listing.findMany({
+    where: { status: "APPROVED", ...(session?.user?.id ? { sellerId: { not: session.user.id } } : {}) },
+    select: { id: true },
+  });
   return <main className="min-h-screen bg-[#f7f8f2] text-[#20291f]">
     <SiteHeader />
     <section className="mx-auto max-w-7xl px-5 pb-7 pt-8 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10">
@@ -12,6 +19,6 @@ export default function BrowsePage() {
         <Link href="/partners" className="inline-flex items-center gap-2 self-start rounded-full border border-[#dce3d8] bg-white px-4 py-2.5 text-sm font-semibold text-[#47644a] transition hover:border-[#b9cdb8] hover:bg-[#f1f5ed] md:self-auto">Need a repair or recycle option? <span aria-hidden="true">↗</span></Link>
       </div>
     </section>
-    <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10"><ListingGrid /></section>
+    <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10"><ListingGrid availableIds={availableListings.map(({ id }) => id)} /></section>
   </main>;
 }

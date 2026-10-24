@@ -30,8 +30,10 @@ export async function registerUser(_previous: RegisterResult, formData: FormData
 export async function loginUser(_previous: RegisterResult, formData: FormData): Promise<RegisterResult> {
   const parsed = credentialsSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
   if (!parsed.success) return { error: "Enter a valid email and password." };
+  const callbackUrl = formData.get("callbackUrl");
+  const redirectTo = typeof callbackUrl === "string" && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//") ? callbackUrl : "/dashboard";
   try {
-    await signIn("credentials", { ...parsed.data, redirectTo: "/dashboard" });
+    await signIn("credentials", { ...parsed.data, redirectTo });
     return { success: true };
   } catch (error) {
     if (error instanceof AuthError) return { error: "Email or password is incorrect." };

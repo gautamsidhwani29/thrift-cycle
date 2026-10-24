@@ -18,7 +18,7 @@ export async function SiteHeader() {
           <Link className="transition hover:text-emerald-900" href="/browse">Browse</Link>
           <Link className="transition hover:text-emerald-900" href="/partners">Partners</Link>
           {user ? (
-            <Link className="transition hover:text-emerald-900" href={user.role === "ADMIN" ? "/admin" : "/dashboard"}>My account</Link>
+            <Link className="transition hover:text-emerald-900" href={user.role === "ADMIN" ? "/admin" : "/my-listings"}>My listings</Link>
           ) : (
             <Link className="transition hover:text-emerald-900" href="/login">Log in</Link>
           )}

@@ -6,19 +6,19 @@ import { demoListings } from "@/lib/demo-listings";
 
 const categories = [...new Set(demoListings.map((listing) => listing.category))].sort();
 
-export function ListingGrid() {
+export function ListingGrid({ availableIds }: { availableIds: string[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All categories");
   const [disposition, setDisposition] = useState("ALL");
   const [maxPrice, setMaxPrice] = useState(5000);
 
-  const results = useMemo(() => demoListings.filter((listing) => {
+  const results = useMemo(() => demoListings.filter((listing) => availableIds.includes(listing.id)).filter((listing) => {
     const matchesQuery = `${listing.title} ${listing.category} ${listing.city} ${listing.note}`.toLowerCase().includes(query.trim().toLowerCase());
     const matchesCategory = category === "All categories" || listing.category === category;
     const matchesDisposition = disposition === "ALL" || listing.disposition === disposition;
     const matchesPrice = listing.disposition === "DONATION" || (listing.price ?? 0) <= maxPrice;
     return matchesQuery && matchesCategory && matchesDisposition && matchesPrice;
-  }), [query, category, disposition, maxPrice]);
+  }), [availableIds, query, category, disposition, maxPrice]);
 
   return <>
     <section className="rounded-[1.75rem] border border-[#e5e9df] bg-white p-4 shadow-sm sm:p-5">

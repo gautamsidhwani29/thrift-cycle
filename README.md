@@ -50,7 +50,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | Verified user | `arjun@thriftcycle.test` | `CycleDemo123!` |
 | Unverified user | `tara@thriftcycle.test` | `CycleDemo123!` |
 
-The admin dashboard shows marketplace counts, pending listing examples, and sample orders. User dashboards show that account's verification status, listings, and orders. Browse the seeded listings at `/browse`.
+The admin dashboard shows marketplace counts, pending listing examples, and sample orders. User dashboards show account status and order activity. Browse listings at `/browse`; your own listings are in the separate `/my-listings` page.
 
 ## Useful commands
 
@@ -68,4 +68,4 @@ To start over with a fresh local database, stop the app, remove `prisma/dev.db`,
 
 Registration, credential login, role-based page access, seeded browsing, and populated dashboards are available. The seeded admin and regular accounts are useful for exploring the different views.
 
-Verification review, creating and moderating listings, checkout, and advancing order logistics are not wired up as interactive workflows yet. The dashboard queue and order entries are sample data for exploring the interface. Listing images are illustrative placeholders, and this demo does not connect to a payment provider or send email.
+Verified users can buy or claim approved seeded listings through checkout, which collects contact and fulfillment details, reserves the item, and provides order progress to buyer and seller. Sellers can accept and prepare orders, mark pickup ready or shipped, and buyers can confirm receipt. Payment confirmation is simulated; there is no payment gateway and no real charge is made. Verification review and creating or moderating listings are not wired up as interactive workflows. Listing images are illustrative placeholders, and this demo does not send email.

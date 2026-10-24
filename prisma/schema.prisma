@@ -86,19 +86,24 @@ model ListingImage {
 }
 
 model Order {
-  id          String       @id @default(cuid())
-  listingId   String
-  buyerId     String
-  sellerId    String
-  status      String       @default("PLACED")
-  amount      Float        @default(0)
-  paymentType String       @default("TEST")
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  listing     Listing      @relation(fields: [listingId], references: [id])
-  buyer       User         @relation("BuyerOrders", fields: [buyerId], references: [id])
-  seller      User         @relation("SellerOrders", fields: [sellerId], references: [id])
-  events      OrderEvent[]
+  id                 String       @id @default(cuid())
+  listingId          String
+  buyerId            String
+  sellerId           String
+  status             String       @default("PLACED")
+  amount             Float        @default(0)
+  paymentType        String       @default("TEST")
+  buyerPhone         String?
+  fulfillmentMethod  String?
+  shippingAddress    String?
+  shippingCity       String?
+  shippingPostalCode String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  listing            Listing      @relation(fields: [listingId], references: [id])
+  buyer              User         @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller             User         @relation("SellerOrders", fields: [sellerId], references: [id])
+  events             OrderEvent[]
 
   @@index([buyerId, createdAt])
   @@index([sellerId, createdAt])
