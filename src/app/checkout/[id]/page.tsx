@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { networkInterfaces } from "node:os";
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { auth } from "@/auth";
@@ -18,6 +20,13 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
   if (!user || (user.role !== "ADMIN" && user.verificationStatus !== "VERIFIED")) redirect("/dashboard");
   const donation = listing.disposition === "DONATION";
   const amount = donation ? 0 : (listing.price ?? 0);
+  const requestHeaders = await headers();
+  const requestHost = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const isLocalHost = requestHost.startsWith("localhost") || requestHost.startsWith("127.0.0.1");
+  const lanAddress = Object.values(networkInterfaces()).flat().find((address) => address?.family === "IPv4" && !address.internal)?.address;
+  const paymentHost = isLocalHost && lanAddress ? requestHost.replace(/^(localhost|127\.0\.0\.1)/, lanAddress) : requestHost;
+  const paymentOrigin = `${protocol}://${paymentHost}`;
 
   return <main className="min-h-screen bg-[#f7f8f2] text-[#20291f]"><SiteHeader />
     <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:px-10">
@@ -32,7 +41,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
           <p className="mt-4 text-sm leading-6 text-[#667363]">Sold by {listing.seller.name}. After checkout, coordinate pickup or delivery directly with the seller.</p>
           <p className="mt-5 text-2xl font-semibold text-[#27563a]">{donation ? "Free" : `₹${amount.toLocaleString("en-IN")}`}</p>
         </section>
-        <CheckoutForm listingId={id} amount={amount} donation={donation} />
+        <CheckoutForm listingId={id} amount={amount} donation={donation} paymentOrigin={paymentOrigin} />
       </div>
     </div>
   </main>;

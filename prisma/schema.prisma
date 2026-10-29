@@ -121,3 +121,15 @@ model OrderEvent {
 
   @@index([orderId, createdAt])
 }
+
+model DemoPayment {
+  token     String   @id @default(cuid())
+  listingId String
+  buyerId   String
+  amount    Float
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([buyerId, listingId, status])
+}
